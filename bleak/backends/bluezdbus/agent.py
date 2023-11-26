@@ -39,13 +39,6 @@ class Agent(ServiceInterface):
         self._callbacks = callbacks
         self._tasks: Set[asyncio.Task] = set()
 
-    async def _create_ble_device(self, device_path: str) -> BLEDevice:
-        manager = await get_global_bluez_manager()
-        props = manager.get_device_props(device_path)
-        return BLEDevice(
-            props["Address"], props["Alias"], {"path": device_path, "props": props}
-        )
-
     @method()
     def Release(self):
         logger.debug("Release")
@@ -70,9 +63,7 @@ class Agent(ServiceInterface):
     async def RequestPasskey(self, device: "o") -> "u":  # noqa: F821
         logger.debug("RequestPasskey %s", device)
 
-        ble_device = await self._create_ble_device(device)
-
-        task = asyncio.create_task(self._callbacks.request_pin(ble_device))
+        task = asyncio.create_task(self._callbacks.request_pin())
         self._tasks.add(task)
 
         try:
