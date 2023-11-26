@@ -160,3 +160,26 @@ async def bluez_agent(bus: MessageBus, callbacks: BaseBleakAgentCallbacks):
 
     finally:
         bus.unexport(agent_path, agent)
+
+
+class PinProviderAgentCallbacks(BaseBleakAgentCallbacks):
+    def __init__(self, pin: str) -> None:
+        super().__init__()
+        self.pin = pin
+
+    async def confirm(self, device: BLEDevice) -> bool:
+        return True
+
+    async def confirm_pin(self, device: BLEDevice, pin: str) -> bool:
+        return True
+
+    async def display_pin(self, device: BLEDevice, pin: str) -> None:
+        # raise NotImplementedError
+        print(f"{device.name} wants to pair.")
+        print(f"enter this pin on the device: {pin}")
+        # wait for cancellation
+        await asyncio.Event().wait()
+
+    async def request_pin(self) -> str:
+        print(f"device wants to pair. Using pin: {self.pin}")
+        return self.pin

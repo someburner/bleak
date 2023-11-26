@@ -35,7 +35,7 @@ from ..client import BaseBleakClient, NotifyCallback
 from ..device import BLEDevice
 from ..service import BleakGATTServiceCollection
 from . import defs
-from .agent import bluez_agent
+from .agent import bluez_agent, PinProviderAgentCallbacks
 from .characteristic import BleakGATTCharacteristicBlueZDBus
 from .manager import get_global_bluez_manager
 from .scanner import BleakScannerBlueZDBus
@@ -381,6 +381,9 @@ class BleakClientBlueZDBus(BaseBleakClient):
         assert_reply(reply)
 
         logger.debug("Pairing to BLE device @ %s", self.address)
+
+        if callbacks is None and 'pin' in kwargs:
+            callbacks = PinProviderAgentCallbacks(kwargs['pin'])
 
         async with contextlib.nullcontext() if callbacks is None else bluez_agent(
             self._bus, callbacks
